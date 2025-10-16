@@ -63,7 +63,21 @@ Do not include any markdown formatting, explanations, or text outside the JSON o
   // Clean up potential markdown formatting
   const jsonText = text_response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
 
-  return JSON.parse(jsonText)
+  try {
+    const parsed = JSON.parse(jsonText)
+
+    // Validate the response structure
+    if (!parsed.items || !Array.isArray(parsed.items)) {
+      console.error('Invalid response structure from Gemini:', jsonText)
+      throw new Error('Invalid response structure: missing or invalid items array')
+    }
+
+    return parsed
+  } catch (parseError) {
+    console.error('Failed to parse Gemini response:', jsonText)
+    console.error('Parse error:', parseError)
+    throw new Error(`Failed to parse AI response: ${parseError instanceof Error ? parseError.message : String(parseError)}`)
+  }
 }
 
 export async function generateCoachingResponse(

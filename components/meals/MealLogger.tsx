@@ -24,13 +24,17 @@ export default function MealLogger({ onMealSaved }: { onMealSaved?: () => void }
 
       const data = await response.json()
 
+      if (!response.ok || data.error) {
+        throw new Error(data.error || 'Failed to parse meal')
+      }
+
       if (data.needs_clarification) {
         setNeedsClarification(true)
         setClarificationQuestion(data.clarification_question)
       } else {
         setNeedsClarification(false)
         setClarificationQuestion('')
-        setParsedItems(data.items)
+        setParsedItems(data.items || [])
         setOriginalText(inputText)
       }
     } catch (error) {
